@@ -74,7 +74,6 @@ var customer = context.Customers.Include(s => s.Sales)
     .ThenInclude(p => p.Product)
     .FirstOrDefault(c => c.Id == response);
 
-
 var total = customer.Sales.Select(s => s.Product.Price).Sum();
 
 
@@ -103,6 +102,36 @@ var customerSales = context.CustomerSales.ToList();
 
 
 Console.ReadLine();
+
+//1. Using the linq queries retrieve a list of all customers from the database who don't have sales
+var customerWithoutSales = context.Customers.Where(c => !context.Sales.Any(s => s.CustomerId == c.Id)).ToList();
+
+//2. Insert a new customer with a sale record
+var customerNew = new Customer
+{
+    DateOfBirth = DateTime.Now.AddYears(-20)
+};
+context.Customers.Add(customerNew);
+context.SaveChanges();
+
+context.Sales.Add(new Sale
+{
+    ProductId = 1,
+    CustomerId = customerNew.Id,
+    StoreId = 1,
+    DateSold = DateTime.Now
+});
+context.SaveChanges();
+
+//3. Add a new store
+context.Stores.Add(new Store
+{
+    Name = "Parnell",
+});
+context.SaveChanges();
+
+//4. Find the list of all stores that have sales
+var storesWithSales = context.Stores.Where(c => context.Sales.Any(s => s.StoreId == c.Id)).ToList();
 
 
 
